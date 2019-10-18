@@ -25,6 +25,8 @@ setup(
         'picamera',
         'pillow',
         'RPi.GPIO',
+        'Adafruit-GPIO>=0.6.5',
+        'flask-socketio',
     ],
     python_requires='>=3.5.3',
 )
