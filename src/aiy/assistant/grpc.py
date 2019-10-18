@@ -59,6 +59,7 @@ class AssistantServiceClient:
         self._volume_percentage = volume_percentage  # Mutable state.
         self._conversation_state = None              # Mutable state.
         self._language_code = language_code
+        self._inputwords = ''
 
         ##
         credentials = auth_helpers.get_assistant_credentials()
@@ -129,7 +130,7 @@ class AssistantServiceClient:
             yield embedded_assistant_pb2.AssistRequest(audio_in=chunk)
 
 
-    def _assist(self, recorder, play, deadline):
+    def _assist(self, recorder, play, deadline, on_state_change):
         continue_conversation = False
 
         for response in self._assistant.Assist(self._requests(recorder), deadline):
@@ -141,6 +142,8 @@ class AssistantServiceClient:
             if response.speech_results:
                 logger.info('You said: "%s".',
                             ' '.join(r.transcript for r in response.speech_results))
+                self._inputwords = ' '.join(r.transcript for r in response.speech_results)
+
             # Process 'audio_out'.
             if response.audio_out.audio_data:
                 recorder.done()  # Just in case.
@@ -152,6 +155,8 @@ class AssistantServiceClient:
                 conversation_state = response.dialog_state_out.conversation_state
                 logger.debug('Updating conversation state.')
                 self._conversation_state = conversation_state  # Mutable state change.
+                if on_state_change:
+                    on_state_change(self._inputwords)
 
             volume_percentage = response.dialog_state_out.volume_percentage
             if volume_percentage:
@@ -172,7 +177,7 @@ class AssistantServiceClient:
 
         return continue_conversation
 
-    def conversation(self, deadline=DEFAULT_GRPC_DEADLINE):
+    def conversation(self, deadline=DEFAULT_GRPC_DEADLINE, on_state_change=None):
         keep_talking = True
         while keep_talking:
             playing = False
@@ -187,7 +192,7 @@ class AssistantServiceClient:
                     play(data)
 
                 try:
-                    keep_talking = self._assist(recorder, wrapped_play, deadline)
+                    keep_talking = self._assist(recorder, wrapped_play, deadline, on_state_change)
                 finally:
                     play(None)       # Signal end of sound stream.
                     recorder.done()  # Signal stop recording.
