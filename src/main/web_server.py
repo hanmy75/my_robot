@@ -70,27 +70,43 @@ if __name__ == '__main__':
 
     GPIO.setmode(GPIO.BCM)
 
+    #GPIO.setup(23, GPIO.IN, pull_up_down=GPIO.PUD_UP)
+
+    #while True:
+    #    if GPIO.input(23):
+    #        print('Input was HIGH')
+    #    else:
+    #        print('Input was LOW')
+    #    time.sleep(1)
+
     # Assign Motor
-    motor_up_left  = Motor(0, 5)
-    motor_up_right = Motor(6, 13)
-    motor_dn_left  = Motor(25, 8)
-    motor_dn_right = Motor(1, 12)
-    motor_waist    = Motor(16, 20)
+    motor_up_left  = Motor(8, 25)
+    motor_up_right  = Motor(0, 5)
+    motor_dn_left = Motor(12, 1)
+    motor_dn_right = Motor(6, 13)
+    #motor_waist    = Motor(16, 20)
 
-    while True:
-        motor_up_left.set_speed(20)
-        motor_up_right.set_speed(80)
-        motor_dn_left.set_speed(30)
-        motor_dn_right.set_speed(70)
-        motor_waist.set_speed(50)
-        time.sleep(5)
+    #motor_up_left.set_speed(30)
+    #motor_up_right.set_speed(30)
+    #motor_dn_left.set_speed(30)
+    #motor_dn_right.set_speed(30)
+    #motor_waist.set_speed(50)
 
-        motor_up_left.set_speed(-20)
-        motor_up_right.set_speed(-80)
-        motor_dn_left.set_speed(-30)
-        motor_dn_right.set_speed(-70)
-        motor_waist.set_speed(-50)
-        time.sleep(5)
+
+#    while True:
+#        motor_up_left.set_speed(20)
+#        motor_up_right.set_speed(80)
+#        motor_dn_left.set_speed(30)
+#        motor_dn_right.set_speed(70)
+#        motor_waist.set_speed(50)
+#        time.sleep(5)
+
+#        motor_up_left.set_speed(-20)
+#        motor_up_right.set_speed(-80)
+#        motor_dn_left.set_speed(-30)
+#        motor_dn_right.set_speed(-70)
+#        motor_waist.set_speed(-50)
+#        time.sleep(5)
 
 
     socketio.run(app, host='0.0.0.0', port=8080, debug=False, use_reloader=False)
