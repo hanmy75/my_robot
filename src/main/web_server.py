@@ -3,12 +3,16 @@
 import logging
 import time
 from RPi import GPIO
+from ht16k33 import matrix
 from flask import Flask, render_template
 from flask_socketio import SocketIO, emit
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'secret!'
 socketio = SocketIO(app)
+
+# Matrix LED
+matrix = matrix.Matrix16x8(address=0x70)
 
 # Set log level
 logging.basicConfig(level=logging.DEBUG)
@@ -69,6 +73,9 @@ class Motor:
 if __name__ == '__main__':
 
     GPIO.setmode(GPIO.BCM)
+
+    icon_buffer = [0xAA,0x55,0xAA,0x55,0xAA,0x55,0xAA,0x55,0xAA,0x55,0xAA,0x55,0xAA,0x55,0xAA,0x55]
+    matrix.set_buffer(icon_buffer)
 
     #GPIO.setup(23, GPIO.IN, pull_up_down=GPIO.PUD_UP)
 
