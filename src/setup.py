@@ -27,6 +27,7 @@ setup(
         'RPi.GPIO',
         'Adafruit-GPIO>=0.6.5',
         'flask-socketio',
+        'eventlet',
     ],
     python_requires='>=3.5.3',
 )
