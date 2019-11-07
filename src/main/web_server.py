@@ -74,8 +74,12 @@ if __name__ == '__main__':
 
     GPIO.setmode(GPIO.BCM)
 
-    icon_buffer = [0xAA,0x55,0xAA,0x55,0xAA,0x55,0xAA,0x55,0xAA,0x55,0xAA,0x55,0xAA,0x55,0xAA,0x55]
-    matrix.set_buffer(icon_buffer)
+    matrix.brightness = 4
+    #matrix.putChar('<', '>')
+    for t in range(0x20, 0x80):
+        matrix.putChar(chr(t), chr(t))
+        time.sleep(1)
+
 
     #GPIO.setup(23, GPIO.IN, pull_up_down=GPIO.PUD_UP)
 
