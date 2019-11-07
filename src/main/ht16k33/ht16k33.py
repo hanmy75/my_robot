@@ -28,16 +28,15 @@
 
 """
 
-from micropython import const
 from Adafruit_GPIO import I2C
 
 __version__ = "0.0.0-auto.0"
 __repo__ = "https://github.com/adafruit/Adafruit_CircuitPython_HT16K33.git"
 
-_HT16K33_BLINK_CMD = const(0x80)
-_HT16K33_BLINK_DISPLAYON = const(0x01)
-_HT16K33_CMD_BRIGHTNESS = const(0xE0)
-_HT16K33_OSCILATOR_ON = const(0x21)
+_HT16K33_BLINK_CMD = 0x80
+_HT16K33_BLINK_DISPLAYON = 0x01
+_HT16K33_CMD_BRIGHTNESS = 0xE0
+_HT16K33_OSCILATOR_ON = 0x21
 
 
 class HT16K33:
