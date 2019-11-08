@@ -39,14 +39,6 @@ $ make
 $ sudo make install
 ```
 
-### Install MY Robot
-```
-$ git clone https://github.com/hanmy75/my_robot.git
-$ sudo pip3 install -e my_robot/src
-```
-- Copy cert (assistant.json) to /home/pi
-
-
 ### Install snowboy
 ```
 $ sudo apt -y install swig python3-pyaudio python3-pip libatlas-base-dev
@@ -56,6 +48,17 @@ $ git clone https://github.com/Kitt-AI/snowboy.git
 $ cd ~/snowboy/swig/Python3
 $ make
 ```
+
+### Install MY Robot
+```
+$ cd ~
+$ git clone https://github.com/hanmy75/my_robot.git
+$ sudo pip3 install -e my_robot/src
+$ cd my_robot/scripts
+$ ./install-services.sh
+```
+- Copy cert (assistant.json) to /home/pi
+
 
 ### Install ADS1115
 ```

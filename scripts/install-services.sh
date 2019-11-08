@@ -16,3 +16,6 @@ sudo systemctl enable mjpg_streamer
 # Copy config
 sudo cp asound.conf /etc
 sudo cp config.txt /boot
+
+# Make cache folder
+mkdir -p .cache
