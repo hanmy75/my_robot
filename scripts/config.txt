@@ -66,3 +66,6 @@ max_framebuffers=2
 #dtoverlay=vc4-fkms-v3d
 start_x=1
 gpu_mem=128
+
+# Disable Camera LED
+disable_camera_led=1
