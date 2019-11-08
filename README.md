@@ -39,6 +39,14 @@ $ make
 $ sudo make install
 ```
 
+### Install MY Robot
+```
+$ git clone https://github.com/hanmy75/my_robot.git
+$ sudo pip3 install -e my_robot/src
+```
+- Copy cert (assistant.json) to /home/pi
+
+
 ### Install snowboy
 ```
 $ sudo apt -y install swig python3-pyaudio python3-pip libatlas-base-dev
@@ -57,13 +65,6 @@ $ cd Adafruit_Python_ADS1x15
 $ sudo python3 setup.py install
 ```
 
-### Install MY Robot
-```
-$ git clone https://github.com/hanmy75/my_robot.git
-$ sudo pip3 install -e my_robot/src
-```
-- Copy cert (assistant.json) to /home/pi
-
 ### Setup I2S amp
 ```
 $ sudo nano /boon/config.txt
@@ -79,6 +80,8 @@ $ sudo nano /boon/config.txt
 ### Pin-out
 | Pin | BCM |  Usage  |
 | :---: | :---: | :---: |
+|     |     |   SW    |
+|  16 |  23 |   NECK  |
 |     |     |   I2C   |
 |  3  |  2  |   SDA   |
 |  5  |  3  |   SCL   |
@@ -87,14 +90,14 @@ $ sudo nano /boon/config.txt
 |  12 |  18 |   BCLK  |
 |  40 |  21 |   DIN   |
 |     |     |  Motor  |
-|  27 |  0  |  M-ULA  |
-|  29 |  5  |  M-ULB  |
-|  31 |  6  |  M-URA  |
-|  33 |  13 |  M-URB  |
-|  22 |  25 |  M-DLA  |
-|  24 |  8  |  M-DLB  |
-|  28 |  1  |  M-DRA  |
-|  32 |  12 |  M-DRB  |
+|  24 |  8  |  M-ULA  |
+|  22 |  25 |  M-ULB  |
+|  27 |  0  |  M-URA  |
+|  29 |  5  |  M-URB  |
+|  32 |  12 |  M-DLA  |
+|  28 |  1  |  M-DLB  |
+|  31 |  6  |  M-DRA  |
+|  33 |  13 |  M-DRB  |
 |  36 |  16 |  M-WSTA |
 |  38 |  20 |  M-WSTB |
 
