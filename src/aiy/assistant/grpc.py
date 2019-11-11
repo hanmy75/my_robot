@@ -233,3 +233,31 @@ class AssistantServiceClientWithLed(AssistantServiceClient):
         self._update_led(Led.ON, 0.1)
         super()._playing_stopped()
 
+
+class AssistantServiceClientWithSoundClip(AssistantServiceClient):
+    """
+    Same API as :class:`AssistantServiceClient` but it also turns the
+    Voice Kit's button LED on and off in response to the conversation.
+
+    :inherited-members:
+    """
+    def __init__(self, soundClip, language_code='en-US', volume_percentage=100):
+        super().__init__(language_code, volume_percentage)
+
+        self._soundClip = soundClip
+        self._soundClip.playWelcome()
+
+    def _recording_started(self):
+        super()._recording_started()
+        self._soundClip.playWakeword()
+
+    def _recording_stopped(self):
+        self._soundClip.playEndword()
+        super()._recording_stopped()
+
+    def _playing_started(self):
+        super()._playing_started()
+
+    def _playing_stopped(self):
+        self._soundClip.playNormalmode()
+        super()._playing_stopped()

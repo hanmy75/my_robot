@@ -15,19 +15,22 @@
 
 """A demo of the Google Assistant GRPC recognizer."""
 
+import time
 import logging
 import threading
 import snowboydecoder
+from ht16k33 import matrix
 from flask import Flask, render_template
 from flask_socketio import SocketIO, emit
 
-from aiy.assistant.grpc import AssistantServiceClient
+from aiy.assistant.grpc import AssistantServiceClientWithSoundClip
 from aiy.voice.audio import play_wav
 
 # Define
 HOST_PORT = 8080
 HOTWORD_MODEL = "resources/hotword.pmdl"
-WAKEUP_SOUND = "resources/ding.wav"
+WAKEUP_CLIP = "resources/ding.wav"
+END_CLIP    = "resources/dong.wav"
 
 
 # For Web service
@@ -35,11 +38,6 @@ app = Flask(__name__)
 app.config['SECRET_KEY'] = 'secret!'
 socketio = SocketIO(app)
 
-# Hotword Detection(snowboy) resource
-detector = snowboydecoder.HotwordDetector(HOTWORD_MODEL, sensitivity=0.5, audio_gain=1.0)
-
-# Get Board for Home assistant
-assistant = AssistantServiceClient(volume_percentage=100, language_code='ko-KR')
 
 ###################################
 # For Web control
@@ -81,6 +79,36 @@ def state_change_callback(input_word):
 
 
 ###################################
+# Sound Clip class
+###################################
+class SoundClip():
+    def __init__(self):
+        # Play sound clip
+        self._play_wav = play_wav
+
+        # Matrix LED
+        self._matrix = matrix.Matrix16x8(address=0x70)
+        self._matrix.brightness = 4
+
+    def playWelcome(self):
+        self._matrix.putChar('O', 'O')
+        self._play_wav(END_CLIP)
+        time.sleep(1)
+        self._play_wav(END_CLIP)
+
+    def playWakeword(self):
+        self._matrix.putChar('?', '?')
+        self._play_wav(WAKEUP_CLIP)
+
+    def playEndword(self):
+        self._matrix.putChar('!', '!')
+        #self._play_wav(END_CLIP)
+
+    def playNormalmode(self):
+        self._matrix.putChar('O', 'O')
+
+
+###################################
 # Home assistant thread
 ###################################
 def homeassistantThread():
@@ -89,9 +117,6 @@ def homeassistantThread():
     while True:
         # start hotword detection
         detector.start(detected_callback)
-
-        # Play detection sound
-        play_wav(WAKEUP_SOUND)
 
         # Start conversation
         assistant.conversation(on_state_change=state_change_callback)
@@ -103,6 +128,13 @@ def homeassistantThread():
 if __name__ == '__main__':
     # Set log level
     logging.basicConfig(level=logging.DEBUG)
+
+    # Hotword Detection(snowboy) resource
+    detector = snowboydecoder.HotwordDetector(HOTWORD_MODEL, sensitivity=0.5, audio_gain=1.0)
+
+    # Get Board for Home assistant
+    soundClip = SoundClip()
+    assistant = AssistantServiceClientWithSoundClip(soundClip=soundClip, volume_percentage=100, language_code='ko-KR')
 
     # Start a thread
     server_thread = threading.Thread(target=homeassistantThread)
