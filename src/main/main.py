@@ -68,6 +68,49 @@ def program_disconnect():
 
 
 ###################################
+# Command Callback
+###################################
+def command_forward():
+    logging.info('Go Forward')
+
+
+def command_backward():
+    logging.info('Go Backward')
+
+
+def command_left():
+    logging.info('Trun Left')
+
+
+def command_right():
+    logging.info('Turn Right')
+
+
+def command_turn():
+    logging.info('One Turn')
+
+
+def command_sitdown():
+    logging.info('Sit down')
+
+
+def command_standup():
+    logging.info('Stand up')
+
+
+# Voice Command List
+VoiceCommandList = [
+    ["앞으로",  command_forward],
+    ["뒤로",  command_backward],
+    ["왼쪽",  command_left],
+    ["오른쪽",  command_right],
+    ["돌아",  command_turn],
+    ["앉아",  command_sitdown],
+    ["일어서",  command_standup],
+]
+
+
+###################################
 # For home assistant
 ###################################
 def detected_callback():
@@ -75,7 +118,19 @@ def detected_callback():
     detector.terminate()
 
 def state_change_callback(input_word):
-    logging.info('Conversation state is changed. <%s>', input_word)
+    ret_value = True
+    logging.info('Input commans is <%s>', input_word)
+
+    soundClip.showChar('!', '!')
+
+    for list in VoiceCommandList:
+        if list[0] in input_word:
+            soundClip.playClip(END_CLIP)
+            list[1]()
+            ret_value = False
+            break
+
+    return ret_value
 
 
 ###################################
@@ -93,19 +148,21 @@ class SoundClip():
     def playWelcome(self):
         self._matrix.putChar('O', 'O')
         self._play_wav(END_CLIP)
-        time.sleep(1)
+        time.sleep(0.5)
         self._play_wav(END_CLIP)
 
     def playWakeword(self):
         self._matrix.putChar('?', '?')
         self._play_wav(WAKEUP_CLIP)
 
-    def playEndword(self):
-        self._matrix.putChar('!', '!')
-        #self._play_wav(END_CLIP)
-
     def playNormalmode(self):
         self._matrix.putChar('O', 'O')
+
+    def playClip(self, file):
+        self._play_wav(file)
+
+    def showChar(self, left_char, right_char):
+        self._matrix.putChar(left_char, right_char)
 
 
 ###################################

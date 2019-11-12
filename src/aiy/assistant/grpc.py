@@ -60,6 +60,7 @@ class AssistantServiceClient:
         self._conversation_state = None              # Mutable state.
         self._language_code = language_code
         self._inputwords = ''
+        self._enable_audio_output = True
 
         ##
         credentials = auth_helpers.get_assistant_credentials()
@@ -144,19 +145,19 @@ class AssistantServiceClient:
                             ' '.join(r.transcript for r in response.speech_results))
                 self._inputwords = ' '.join(r.transcript for r in response.speech_results)
 
-            # Process 'audio_out'.
-            if response.audio_out.audio_data:
-                recorder.done()  # Just in case.
-                play(_normalize_audio_buffer(response.audio_out.audio_data,
-                                             self._volume_percentage))
-
             # Process 'dialog_state_out'.
             if response.dialog_state_out.conversation_state:
                 conversation_state = response.dialog_state_out.conversation_state
                 logger.debug('Updating conversation state.')
                 self._conversation_state = conversation_state  # Mutable state change.
                 if on_state_change:
-                    on_state_change(self._inputwords)
+                    self._enable_audio_output = on_state_change(self._inputwords)
+
+            # Process 'audio_out'.
+            if self._enable_audio_output and response.audio_out.audio_data:
+                recorder.done()  # Just in case.
+                play(_normalize_audio_buffer(response.audio_out.audio_data,
+                                             self._volume_percentage))
 
             volume_percentage = response.dialog_state_out.volume_percentage
             if volume_percentage:
@@ -252,7 +253,6 @@ class AssistantServiceClientWithSoundClip(AssistantServiceClient):
         self._soundClip.playWakeword()
 
     def _recording_stopped(self):
-        self._soundClip.playEndword()
         super()._recording_stopped()
 
     def _playing_started(self):
