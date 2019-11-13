@@ -104,6 +104,8 @@ def command_standup():
 
 
 # Voice Command List
+# 0 : command string
+# 1 : command callback function
 VoiceCommandList = [
     ["앞으로",  command_forward],
     ["뒤로",  command_backward],
@@ -170,6 +172,17 @@ class SoundClip():
         self._matrix.putChar(left_char, right_char)
 
 
+# Motor position calibration table
+# 0 : min value
+# 1 : max value
+# 2 : gain
+MotorPositionTable = [
+    [0, 65535, 1],
+    [0, 65535, 1],
+    [0, 65535, 1],
+    [0, 65535, 1],
+]
+
 ###################################
 # Motor class
 ###################################
@@ -203,9 +216,21 @@ class Motor:
             self._pwmB.ChangeDutyCycle(0)
 
     def get_position(self):
+        tuning_parm = MotorPositionTable[self._index]
         value = self._adc.read_adc(self._index, gain=GAIN)
+
+        # Cut value from min-max
+        value = tuning_parm[0] if value < tuning_parm[0] else value
+        value = tuning_parm[1] if value > tuning_parm[1] else value
+
+        # Normalization (0~100)
+        if tuning_parm[2] > 0:
+            return_value = int((value-tuning_parm[0])*100/(tuning_parm[1]-tuning_parm[0]))
+        else
+            return_value = int((tuning_parm[1]-value)*100/(tuning_parm[1]-tuning_parm[0]))
+
         logging.info('Channel %d position %d', self._index, value)
-        return value
+        return return_value
 
 
 ###################################
