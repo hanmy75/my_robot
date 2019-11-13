@@ -20,6 +20,7 @@ import logging
 import threading
 import snowboydecoder
 from ht16k33 import matrix
+from ads1x15 import ADS1x15
 from flask import Flask, render_template
 from flask_socketio import SocketIO, emit
 
@@ -27,6 +28,8 @@ from aiy.assistant.grpc import AssistantServiceClientWithSoundClip
 from aiy.voice.audio import play_wav
 
 # Define
+GAIN = 1
+MAX_PWM = 100
 HOST_PORT = 8080
 HOTWORD_MODEL = "resources/hotword.pmdl"
 WAKEUP_CLIP = "resources/ding.wav"
@@ -48,6 +51,8 @@ def index():
 
 @socketio.on('pos')
 def program_pos(msx, msy):
+    msx = int(msx * MAX_PWM / 255)
+    msy = int(msy * MAX_PWM / 255)
     logging.info("pos %d,%d", msx, msy)
 
 @socketio.on('light')
@@ -166,6 +171,44 @@ class SoundClip():
 
 
 ###################################
+# Motor class
+###################################
+class Motor:
+    """ An interface for motor control."""
+
+    def __init__(self, channelA, channelB, adc, index):
+        self._channelA = channelA
+        self._channelB = channelB
+        self._adc = adc
+        self._index = index
+        GPIO.setup(channelA, GPIO.OUT)
+        GPIO.setup(channelB, GPIO.OUT)
+        self._pwmA = GPIO.PWM(channelA, 100)    # frequency : 100 Hz
+        self._pwmB = GPIO.PWM(channelB, 100)    # frequency : 100 Hz
+        self._pwmA.start(0)
+        self._pwmB.start(0)
+
+    def close(self):
+        self._pwmA.stop()
+        self._pwmB.stop()
+        GPIO.cleanup(self._channelA)
+        GPIO.cleanup(self._channelB)
+
+    def set_speed(self, speed):  # Speed range (-100 ~ 100)
+        if (speed >= 0):
+            self._pwmA.ChangeDutyCycle(0)
+            self._pwmB.ChangeDutyCycle(speed)
+        else:
+            self._pwmA.ChangeDutyCycle(-speed)
+            self._pwmB.ChangeDutyCycle(0)
+
+    def get_position(self):
+        value = self._adc.read_adc(self._index, gain=GAIN)
+        logging.info('Channel %d position %d', self._index, value)
+        return value
+
+
+###################################
 # Home assistant thread
 ###################################
 def homeassistantThread():
@@ -185,6 +228,16 @@ def homeassistantThread():
 if __name__ == '__main__':
     # Set log level
     logging.basicConfig(level=logging.DEBUG)
+
+    # Create an ADS1115 ADC (16-bit) instance.
+    adc = ADS1x15.ADS1115()
+
+    # Assign Motor
+    motor_up_left  = Motor(8, 25, adc, 0)
+    motor_up_right = Motor(0, 5, adc, 1)
+    motor_dn_left  = Motor(12, 1, adc, 2)
+    motor_dn_right = Motor(6, 13, adc, 3)
+    #motor_waist    = Motor(16, 20)
 
     # Hotword Detection(snowboy) resource
     detector = snowboydecoder.HotwordDetector(HOTWORD_MODEL, sensitivity=0.5, audio_gain=1.0)
