@@ -19,6 +19,7 @@ import time
 import logging
 import threading
 import snowboydecoder
+from RPi import GPIO
 from ht16k33 import matrix
 from ads1x15 import ADS1x15
 from flask import Flask, render_template
@@ -108,12 +109,18 @@ def command_standup():
 # 1 : command callback function
 VoiceCommandList = [
     ["앞으로",  command_forward],
+    ["들어가",  command_forward],
+    ["이리 와",  command_forward],
     ["뒤로",  command_backward],
     ["왼쪽",  command_left],
     ["오른쪽",  command_right],
     ["돌아",  command_turn],
     ["앉아",  command_sitdown],
+    ["안 자",  command_sitdown],
+    ["남자",  command_sitdown],
+    ["감자",  command_sitdown],
     ["일어서",  command_standup],
+    ["일어나",  command_standup],
 ]
 
 
@@ -177,10 +184,10 @@ class SoundClip():
 # 1 : max value
 # 2 : gain
 MotorPositionTable = [
-    [0, 65535, 1],
-    [0, 65535, 1],
-    [0, 65535, 1],
-    [0, 65535, 1],
+    [15000, 26000, -1],
+    [2500, 12500, 1],
+    [9000, 20000, -1],
+    [5000, 15000, 1],
 ]
 
 ###################################
@@ -226,10 +233,9 @@ class Motor:
         # Normalization (0~100)
         if tuning_parm[2] > 0:
             return_value = int((value-tuning_parm[0])*100/(tuning_parm[1]-tuning_parm[0]))
-        else
+        else:
             return_value = int((tuning_parm[1]-value)*100/(tuning_parm[1]-tuning_parm[0]))
 
-        logging.info('Channel %d position %d', self._index, value)
         return return_value
 
 
@@ -254,12 +260,14 @@ if __name__ == '__main__':
     # Set log level
     logging.basicConfig(level=logging.DEBUG)
 
+    GPIO.setmode(GPIO.BCM)
+
     # Create an ADS1115 ADC (16-bit) instance.
-    adc = ADS1x15.ADS1115()
+    adc = ADS1x15.ADS1115(address=0x49)
 
     # Assign Motor
-    motor_up_left  = Motor(8, 25, adc, 0)
-    motor_up_right = Motor(0, 5, adc, 1)
+    motor_up_left  = Motor(8, 25, adc, 1)
+    motor_up_right = Motor(0, 5, adc, 0)
     motor_dn_left  = Motor(12, 1, adc, 2)
     motor_dn_right = Motor(6, 13, adc, 3)
     #motor_waist    = Motor(16, 20)
